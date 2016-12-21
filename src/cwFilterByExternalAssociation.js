@@ -127,7 +127,6 @@
     };
 
     cwFilterByExternalAssociation.prototype.applyJavaScript = function () {
-        debugger;
         var that = this;
         var libToLoad = [];
 
@@ -135,7 +134,7 @@
             libToLoad = ['modules/bootstrap/bootstrap.min.js','modules/bootstrap-select/bootstrap-select.min.js'];
         }
 
-        cwApi.customLibs.aSyncLoader.loadUrls(libToLoad,function(error){
+        cwApi.customLibs.aSyncLayoutLoader.loadUrls(libToLoad,function(error){
             if(error === null) {
                 that.createFilter();                
             } else {
