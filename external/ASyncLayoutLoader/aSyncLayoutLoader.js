@@ -5,11 +5,11 @@
 
     "use strict";
     // constructor
-    var aSyncLoader = function () {
+    var aSyncLayoutLoader = function () {
         this.urls = {};
     };;
 
-    aSyncLoader.prototype.CheckUrl = function (url,callback) {
+    aSyncLayoutLoader.prototype.CheckUrl = function (url,callback) {
         if(!this.urls.hasOwnProperty(url)) {
             console.log("create " + url);
             this.urls[url] = new cwApi.customLibs.urlToLoadAsync(url,callback);
@@ -28,7 +28,7 @@
         }
     };
 
-    aSyncLoader.prototype.loadUrls = function (urls,callback) {
+    aSyncLayoutLoader.prototype.loadUrls = function (urls,callback) {
         var i;
         var loaded = urls.length;
         for (var i = 0; i < urls.length; i += 1) {
@@ -46,7 +46,7 @@
     };
 
 
-    aSyncLoader.prototype.load = function (url,callback) {
+    aSyncLayoutLoader.prototype.load = function (url,callback) {
         $.ajax({
             url: url,
             dataType: 'script',
@@ -61,8 +61,8 @@
     if(!cwApi.customLibs) {
         cwApi.customLibs = {};
     }
-    if(!cwApi.customLibs.aSyncLoader){
-        cwApi.customLibs.aSyncLoader = new aSyncLoader();
+    if(!cwApi.customLibs.aSyncLayoutLoader){
+        cwApi.customLibs.aSyncLayoutLoader = new aSyncLayoutLoader();
     };
 
 
