@@ -1,7 +1,7 @@
 {
   "name": "FilterByExternalAssociation",
   "description": "Allow you to filter items on a node depending on a External association",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "main": "cwFilterByExternalAssociation.js",
   "scripts": {
     "test": ""
