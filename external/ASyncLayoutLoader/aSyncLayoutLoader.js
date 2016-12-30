@@ -22,8 +22,8 @@
             } else if(status === "loaded") {
                 callback();
                 console.log("url " + url + " already loading");
-            } else if(status === "notLoaded") {
-                console.log("That shouln't happen");
+            } else if(status === "failed") {
+                callback(this.urls[url].getError());
             }
         }
     };
@@ -32,10 +32,14 @@
         var i;
         var loaded = urls.length;
         for (var i = 0; i < urls.length; i += 1) {
-            this.CheckUrl(urls[i], function() {
-                loaded = loaded - 1;
-                if(loaded === 0) {
-                    callback(null);
+            this.CheckUrl(urls[i], function(error) {
+                if(error !== null) {
+                    callback(error);
+                } else {
+                    loaded = loaded - 1;
+                    if(loaded === 0) {
+                        callback(null);
+                    }                   
                 }
             });
         }

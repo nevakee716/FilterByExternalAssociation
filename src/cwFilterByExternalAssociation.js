@@ -129,16 +129,24 @@
     cwFilterByExternalAssociation.prototype.applyJavaScript = function () {
         var that = this;
         var libToLoad = [];
+        var libToLoadStatics = [];
 
         if(cwAPI.isDebugMode !== true) {
-            libToLoad = ['modules/bootstrap/bootstrap.min.js','modules/bootstrap-select/bootstrap-select.min.js'];
+            libToLoad = ['../../Common/modules/bootstrap/bootstrap.min.js','../../Common/modules/bootstrap-select/bootstrap-select.min.js'];
+            libToLoadStatics = ['modules/bootstrap/bootstrap.min.js','modules/bootstrap-select/bootstrap-select.min.js'];
         }
 
         cwApi.customLibs.aSyncLayoutLoader.loadUrls(libToLoad,function(error){
             if(error === null) {
                 that.createFilter();                
             } else {
-                console.log(error);
+                cwApi.customLibs.aSyncLayoutLoader.loadUrls(libToLoadStatics,function(error){
+                    if(error === null) {
+                        that.createFilter();                
+                    } else {
+                        console.log(error);
+                    }
+                });
             }
         });
     };

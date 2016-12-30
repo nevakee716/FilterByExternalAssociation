@@ -9,6 +9,7 @@
         this.url = url;
         this.status = "notLoaded";
         this.callbacks = [callback];
+        this.error = null;
     };
 
     urlToLoadAsync.prototype.addCallback = function (callback) {
@@ -17,6 +18,10 @@
 
     urlToLoadAsync.prototype.getStatus = function () {
         return this.status;
+    };
+
+    urlToLoadAsync.prototype.getError = function () {
+        return this.error;
     };
 
     urlToLoadAsync.prototype.load = function () {
@@ -32,10 +37,11 @@
                     callback(null);
                 });
             },
-            error: function(XMLHttpRequest, textStatus, errorThrown) { 
+            error: function(XMLHttpRequest) { 
                 that.status = "failed";
+                that.error = "error " + XMLHttpRequest.status + " : " + XMLHttpRequest.statusText;
                 that.callbacks.forEach(function(callback) {
-                    callback(errorThrown);
+                    callback(that.error);
                 });
             }  
         });
