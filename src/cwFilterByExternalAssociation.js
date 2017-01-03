@@ -8,7 +8,6 @@
         cwApi.extend(this, cwApi.cwLayouts.CwLayout, options, viewSchema);
         this.NodesID = {};
         this.createObjectNodes(true,this.options.CustomOptions['filter-in']);
-        this.createObjectNodes(false,this.options.CustomOptions['filter-out']);
         this.replaceLayout = this.options.CustomOptions['replace-layout'];
         this.betweenAssociationTypePolicy = this.options.CustomOptions['multiple-association-type-policy'];
         this.betweenAssociationPolicy = this.options.CustomOptions['multiple-association-policy'];
