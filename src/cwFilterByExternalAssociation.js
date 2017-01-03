@@ -76,15 +76,14 @@
 
     cwFilterByExternalAssociation.prototype.applyJavaScript = function () {
         var that = this;
-        var libToLoadDynamic = [];
-        var libToLoadStatics = [];
+        var libToLoad = [];
 
         if(cwAPI.isDebugMode() === true) {
             that.createFilter();
         } else {
             libToLoad = ['modules/bootstrap/bootstrap.min.js','modules/bootstrap-select/bootstrap-select.min.js'];
             // AsyncLoad
-            cwApi.customLibs.aSyncLayoutLoader.loadUrls(libToLoadDynamic,function(error){
+            cwApi.customLibs.aSyncLayoutLoader.loadUrls(libToLoad,function(error){
                 if(error === null) {
                     that.createFilter();                
                 } else {
