@@ -47,7 +47,7 @@
         return result;
     };
 
-    nodeFilter.prototype.isObjectMatching = function (object) {
+    nodeFilter.prototype.isObjectMatching = function (object,policy) {
         var i;
         for (i = 0; i < object.length; i += 1) {
             if(this.filterField.hasOwnProperty(object[i].object_id) && this.filterField[object[i].object_id].state === true) {

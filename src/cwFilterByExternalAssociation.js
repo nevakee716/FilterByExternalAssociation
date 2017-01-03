@@ -10,6 +10,9 @@
         this.createObjectNodes(true,this.options.CustomOptions['filter-in']);
         this.createObjectNodes(false,this.options.CustomOptions['filter-out']);
         this.replaceLayout = this.options.CustomOptions['replace-layout'];
+        this.betweenAssociationTypePolicy = this.options.CustomOptions['multiple-association-type-policy'];
+        this.betweenAssociationPolicy = this.options.CustomOptions['multiple-association-policy'];
+
         cwApi.extend(this, cwApi.cwLayouts[this.replaceLayout], options, viewSchema);
         cwApi.registerLayoutForJSActions(this);
         this.viewSchema = viewSchema; 
@@ -27,7 +30,6 @@
             }
         }
     };
-
 
 
     // obligatoire appeler par le system
@@ -70,73 +72,19 @@
         }
     };
 
-    cwFilterByExternalAssociation.prototype.FilterObjectAndDraw = function(container) {
-        var filterObject = $.extend(true, {}, this.noneFilterObject);
-        this.FilterObject(filterObject);
-        var output = [];
-        var associationTitleText = this.associationTitleText;
-        
-        if(cwApi.cwLayouts[this.replaceLayout].drawAssociations) {
-            cwApi.cwLayouts[this.replaceLayout].drawAssociations.call(this,output, associationTitleText, filterObject);
-        } else {
-            cwApi.cwLayouts.CwLayout.prototype.drawAssociations.call(this,output, associationTitleText, filterObject);
-        }
-        container.lastChild.innerHTML = output.join('');
-    };
 
-    cwFilterByExternalAssociation.prototype.FilterObject = function(child) {
-        var nextChild = null;
-        var nodeToDelete;
-        var i;
-        var state;
-        var policyBetweenAT = false;
-
-        // check if there is one or several association to be filter
-        for (var associationNode in child.associations) {
-            if (child.associations.hasOwnProperty(associationNode) && this.NodesID.hasOwnProperty(associationNode)) {
-                if(state === undefined) {
-                    state = !policyBetweenAT;
-                }
-                if(this.NodesID[associationNode].isObjectMatching(child.associations[associationNode]) === policyBetweenAT) {
-                    state = policyBetweenAT;
-                }
-            }
-        }
-        // if this node shouldn't be display return false
-        if(state === false) {
-            return false;
-        }
-
-        // otherway continue parsing of the json object
-        for (var associationNode in child.associations) {
-            if (child.associations.hasOwnProperty(associationNode)) {
-                nodeToDelete = [];
-                for (i = 0; i < child.associations[associationNode].length; i += 1) {
-                    nextChild = child.associations[associationNode][i];
-                    if(!this.FilterObject(nextChild)) {
-                        nodeToDelete.push(i);
-                    }
-                }
-
-                for (var i = nodeToDelete.length-1; i >= 0; i -= 1) {
-                    delete child.associations[associationNode].splice(nodeToDelete[i], 1);
-                }
-            }
-        }
-        return true;
-    };
 
     cwFilterByExternalAssociation.prototype.applyJavaScript = function () {
         var that = this;
-        var libToLoad = [];
+        var libToLoadDynamic = [];
         var libToLoadStatics = [];
 
         if(cwAPI.isDebugMode !== true) {
-            libToLoad = ['../../Common/modules/bootstrap/bootstrap.min.js','../../Common/modules/bootstrap-select/bootstrap-select.min.js'];
+            libToLoadDynamic = ['../../Common/modules/bootstrap/bootstrap.min.js','../../Common/modules/bootstrap-select/bootstrap-select.min.js'];
             libToLoadStatics = ['modules/bootstrap/bootstrap.min.js','modules/bootstrap-select/bootstrap-select.min.js'];
         }
 
-        cwApi.customLibs.aSyncLayoutLoader.loadUrls(libToLoad,function(error){
+        cwApi.customLibs.aSyncLayoutLoader.loadUrls(libToLoadDynamic,function(error){
             if(error === null) {
                 that.createFilter();                
             } else {
@@ -185,7 +133,64 @@
     };
 
 
+    cwFilterByExternalAssociation.prototype.FilterObjectAndDraw = function(container) {
 
+        //on duplique le l objet json afin de toujours avoir une copie de l'original
+        var filterObject = $.extend(true, {}, this.noneFilterObject);
+        this.FilterObject(filterObject);
+        var output = [];
+        var associationTitleText = this.associationTitleText;
+        
+        if(cwApi.cwLayouts[this.replaceLayout].drawAssociations) {
+            cwApi.cwLayouts[this.replaceLayout].drawAssociations.call(this,output, associationTitleText, filterObject);
+        } else {
+            cwApi.cwLayouts.CwLayout.prototype.drawAssociations.call(this,output, associationTitleText, filterObject);
+        }
+        container.lastChild.innerHTML = output.join('');
+    };
+
+    cwFilterByExternalAssociation.prototype.FilterObject = function(child) {
+        var nextChild = null;
+        var nodeToDelete;
+        var i;
+        var state;
+        var policyBetweenAT = this.betweenAssociationTypePolicy;
+
+        // check if there is one or several association to be filter
+        for (var associationNode in child.associations) {
+            if (child.associations.hasOwnProperty(associationNode) && this.NodesID.hasOwnProperty(associationNode)) {
+                // init the node if it should be filtered
+                if(state === undefined) {
+                    state = !policyBetweenAT;
+                }
+                if(this.NodesID[associationNode].isObjectMatching(child.associations[associationNode],this.betweenAssociationPolicy) === policyBetweenAT) {
+                    state = policyBetweenAT;
+                }
+            }
+        }
+        // if this node shouldn't be display return false
+        if(state === false) {
+            return false;
+        }
+
+        // otherway continue parsing of the json object
+        for (var associationNode in child.associations) {
+            if (child.associations.hasOwnProperty(associationNode)) {
+                nodeToDelete = [];
+                for (i = 0; i < child.associations[associationNode].length; i += 1) {
+                    nextChild = child.associations[associationNode][i];
+                    if(!this.FilterObject(nextChild)) {
+                        nodeToDelete.push(i);
+                    }
+                }
+
+                for (var i = nodeToDelete.length-1; i >= 0; i -= 1) {
+                    delete child.associations[associationNode].splice(nodeToDelete[i], 1);
+                }
+            }
+        }
+        return true;
+    };
 
     cwApi.cwLayouts.cwFilterByExternalAssociation = cwFilterByExternalAssociation;
 
