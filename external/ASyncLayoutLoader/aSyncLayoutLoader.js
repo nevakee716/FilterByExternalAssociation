@@ -10,6 +10,9 @@
     };;
 
     aSyncLayoutLoader.prototype.CheckUrl = function (url,callback) {
+        if(cwApi.isLive()) {
+            url = "../../Common/" + url;
+        }
         if(!this.urls.hasOwnProperty(url)) {
             console.log("create " + url);
             this.urls[url] = new cwApi.customLibs.urlToLoadAsync(url,callback);

@@ -79,24 +79,22 @@
         var libToLoadDynamic = [];
         var libToLoadStatics = [];
 
-        if(cwAPI.isDebugMode !== true) {
-            libToLoadDynamic = ['../../Common/modules/bootstrap/bootstrap.min.js','../../Common/modules/bootstrap-select/bootstrap-select.min.js'];
-            libToLoadStatics = ['modules/bootstrap/bootstrap.min.js','modules/bootstrap-select/bootstrap-select.min.js'];
+        if(cwAPI.isDebugMode() === true) {
+            that.createFilter();
+        } else {
+            libToLoad = ['modules/bootstrap/bootstrap.min.js','modules/bootstrap-select/bootstrap-select.min.js'];
+            // AsyncLoad
+            cwApi.customLibs.aSyncLayoutLoader.loadUrls(libToLoadDynamic,function(error){
+                if(error === null) {
+                    that.createFilter();                
+                } else {
+                    console.log(error);
+                }
+            });
         }
 
-        cwApi.customLibs.aSyncLayoutLoader.loadUrls(libToLoadDynamic,function(error){
-            if(error === null) {
-                that.createFilter();                
-            } else {
-                cwApi.customLibs.aSyncLayoutLoader.loadUrls(libToLoadStatics,function(error){
-                    if(error === null) {
-                        that.createFilter();                
-                    } else {
-                        console.log(error);
-                    }
-                });
-            }
-        });
+
+
     };
       
 
@@ -161,10 +159,10 @@
             if (child.associations.hasOwnProperty(associationNode) && this.NodesID.hasOwnProperty(associationNode)) {
                 // init the node if it should be filtered
                 if(state === undefined) {
-                    state = !policyBetweenAT;
+                    state = policyBetweenAT; 
                 }
-                if(this.NodesID[associationNode].isObjectMatching(child.associations[associationNode],this.betweenAssociationPolicy) === policyBetweenAT) {
-                    state = policyBetweenAT;
+                if(this.NodesID[associationNode].isObjectMatching(child.associations[associationNode],this.betweenAssociationPolicy) === !policyBetweenAT) {
+                    state = !policyBetweenAT; 
                 }
             }
         }
