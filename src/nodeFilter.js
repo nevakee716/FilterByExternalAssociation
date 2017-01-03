@@ -49,12 +49,36 @@
 
     nodeFilter.prototype.isObjectMatching = function (object,policy) {
         var i;
-        for (i = 0; i < object.length; i += 1) {
-            if(this.filterField.hasOwnProperty(object[i].object_id) && this.filterField[object[i].object_id].state === true) {
-                return true; 
+        var state = undefined; // if there are no filter check state stay undefined and return false
+        var id;
+        var isFieldInObject;
+       
+        // go throught all filter fields that are true
+        for (id in this.filterField) {
+            if (this.filterField.hasOwnProperty(id) && this.filterField[id].state === true) {
+                
+                //init
+                if(state === undefined) {
+                    state = policy;
+                }
+
+                isFieldInObject = false;
+                for (i = 0; i < object.length; i += 1) {
+                    if(object[i].object_id == id) {
+                        isFieldInObject = true;
+                    }
+                }
+                if(isFieldInObject === !policy) {
+                    state = !policy;
+                }
             }
+        }    
+
+        if(state === false || state === undefined) {
+            return false;
         }
-        return false;
+
+        return true;
     };
 
     nodeFilter.prototype.setAllState = function (value) {
