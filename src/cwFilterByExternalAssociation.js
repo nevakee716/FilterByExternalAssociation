@@ -5,16 +5,32 @@
     'use strict';
 
     var cwFilterByExternalAssociation = function(options, viewSchema) {
-        cwApi.extend(this, cwApi.cwLayouts.CwLayout, options, viewSchema);
-        this.NodesID = {};
-        this.createObjectNodes(true,this.options.CustomOptions['filter-in']);
-        this.replaceLayout = this.options.CustomOptions['replace-layout'];
-        this.betweenAssociationTypePolicy = this.options.CustomOptions['multiple-association-type-policy'];
-        this.betweenAssociationPolicy = this.options.CustomOptions['multiple-association-policy'];
+        var error;
 
-        cwApi.extend(this, cwApi.cwLayouts[this.replaceLayout], options, viewSchema);
-        cwApi.registerLayoutForJSActions(this);
-        this.viewSchema = viewSchema; 
+
+        if(options.CustomOptions.hasOwnProperty('replace-layout')) {
+
+            this.replaceLayout = options.CustomOptions['replace-layout'];
+            cwApi.extend(this, cwApi.cwLayouts[this.replaceLayout], options, viewSchema);
+
+            this.NodesID = {};
+            this.createObjectNodes(true,this.options.CustomOptions['filter-in']);
+            
+            this.betweenAssociationTypePolicy = this.options.CustomOptions['multiple-association-type-policy'];
+            this.betweenAssociationPolicy = this.options.CustomOptions['multiple-association-policy'];
+
+            cwApi.registerLayoutForJSActions(this);
+            this.viewSchema = viewSchema; 
+
+
+        } else {
+            error = 'Cannot find replace-layout';
+            cwAPI.Log.Error(error);   
+            return error;         
+        }
+
+
+
     };
 
     cwFilterByExternalAssociation.prototype.createObjectNodes = function(nodeType,customOptions) {
@@ -38,20 +54,11 @@
         this.noneFilterObject = object;
         this.associationTitleText = associationTitleText;
         if(cwApi.cwLayouts[this.replaceLayout].drawAssociations) {
-            cwApi.cwLayouts[this.replaceLayout].drawAssociations.call(this,output, associationTitleText, object);
+            cwApi.cwLayouts[this.replaceLayout].prototype.drawAssociations.call(this,output, associationTitleText, object);
         } else {
             cwApi.cwLayouts.CwLayout.prototype.drawAssociations.call(this,output, associationTitleText, object);
         }
 
-    };
-
-
-    cwFilterByExternalAssociation.prototype.drawOneMethod = function (output, child) {
-        if(cwApi.cwLayouts[this.replaceLayout].drawOneMethod) {
-            cwApi.cwLayouts[this.replaceLayout].drawOneMethod.call(this, output, child);
-        } else if(cwApi.cwLayouts[this.replaceLayout].drawOne) {
-            cwApi.cwLayouts[this.replaceLayout].drawOne.call(this, output, child);
-        }
     };
 
     cwFilterByExternalAssociation.prototype.findFilterFields = function(child) {
