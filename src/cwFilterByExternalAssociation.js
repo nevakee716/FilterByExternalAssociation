@@ -86,7 +86,7 @@
                 if(error === null) {
                     that.createFilter();                
                 } else {
-                    console.log(error);
+                    cwAPI.Log.Error(error);
                 }
             });
         }
