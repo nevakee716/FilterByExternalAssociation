@@ -75,10 +75,10 @@
         }    
 
         if(state === false || state === undefined) {
-            return false;
+            return !this.policy;
         }
 
-        return true;
+        return this.policy;
     };
 
     nodeFilter.prototype.setAllState = function (value) {
@@ -100,7 +100,7 @@
         filterObject.setAttribute('multiple','');
         filterObject.setAttribute('title',this.label);
         filterObject.setAttribute('data-live-search','true');
-        filterObject.setAttribute('data-selected-text-format','static');
+        filterObject.setAttribute('data-selected-text-format','count > 2');
         filterObject.setAttribute('data-actions-box','true');
         filterObject.setAttribute('data-container','body');
         filterObject.setAttribute('data-size','10');

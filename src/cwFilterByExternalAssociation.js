@@ -15,7 +15,7 @@
 
             this.NodesID = {};
             this.createObjectNodes(true,this.options.CustomOptions['filter-in']);
-            
+            this.createObjectNodes(false,this.options.CustomOptions['filter-out']);           
             this.betweenAssociationTypePolicy = this.options.CustomOptions['multiple-association-type-policy'];
             this.betweenAssociationPolicy = this.options.CustomOptions['multiple-association-policy'];
 
@@ -53,7 +53,7 @@
         output.push('<div id="cwLayoutFilter"></div>');
         this.noneFilterObject = object;
         this.associationTitleText = associationTitleText;
-        if(cwApi.cwLayouts[this.replaceLayout].drawAssociations) {
+        if(cwApi.cwLayouts[this.replaceLayout].prototype.drawAssociations) {
             cwApi.cwLayouts[this.replaceLayout].prototype.drawAssociations.call(this,output, associationTitleText, object);
         } else {
             cwApi.cwLayouts.CwLayout.prototype.drawAssociations.call(this,output, associationTitleText, object);
@@ -68,7 +68,7 @@
                 var nodeToDelete = [];
                 for (var i = 0; i < child.associations[associationNode].length; i += 1) {
                     if(this.NodesID.hasOwnProperty(associationNode)) {
-                        this.NodesID[associationNode].addfield(child.associations[associationNode][i].objectTypeScriptName,child.associations[associationNode][i].name,child.associations[associationNode][i].object_id);
+                        this.NodesID[associationNode].addfield(this.viewSchema.NodesByID[associationNode].NodeName,child.associations[associationNode][i].name,child.associations[associationNode][i].object_id);
                     } else {
                         nextChild = child.associations[associationNode][i];
                         this.findFilterFields(nextChild);
