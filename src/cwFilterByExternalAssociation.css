@@ -1,0 +1,28 @@
+.selectcwLayoutPickerFilterByExternalAssociation button{
+  padding: 5px;
+  -o-transition: 0.25s ease-in-out;
+  -moz-transition: 0.25s ease-in-out;
+  -webkit-transition: 0.25s ease-in-out;
+  transition: 0.25s ease-in-out;
+  border-radius: 5px;
+  outline: none;
+  line-height: 20px;
+  border-right: 0;
+  height: 34px;
+  display: inline-block;
+  vertical-align: top;
+  width: 100%;
+  text-align: center;
+  border: 1px solid #00695C;
+  box-shadow: 1px 2px 2px #BDBDBD;
+  box-sizing: border-box;
+  height:10%
+}
+
+#cwLayoutFilterByExternalAssociationWrapper {
+  padding-bottom:40px;
+}
+
+#cwLayoutFilterByExternalAssociation {
+  position:fixed;
+}
