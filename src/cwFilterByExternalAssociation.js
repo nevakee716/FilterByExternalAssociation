@@ -22,7 +22,7 @@
             cwApi.registerLayoutForJSActions(this);
             this.viewSchema = viewSchema; 
 
-
+            this.CreateOtherOptions(this.options.CustomOptions['other-options']);
         } else {
             error = 'Cannot find replace-layout';
             cwAPI.Log.Error(error);   
@@ -32,6 +32,31 @@
 
 
     };
+
+
+    cwFilterByExternalAssociation.prototype.CreateOtherOptions = function(options) {
+        if(options) {
+            var optionList = options.split("#");
+            var optionSplit;
+
+            for (var i = 0; i < optionList.length; i += 1) {
+                if(optionList[i] !== "") {
+                    var optionSplit = optionList[i].split(":");
+                    if(optionSplit[0] && optionSplit[1] && optionSplit[2] && optionSplit[2] === '1') {
+                        if(optionSplit[1] === "true") {
+                            this.options.CustomOptions[optionSplit[0]] = true;  
+                        } else if(optionSplit[1] === "false") {
+                            this.options.CustomOptions[optionSplit[0]] = false; 
+                        }
+                    }
+                    else if(optionSplit[0] && optionSplit[1]  && optionSplit[2] === '0') {
+                        this.options.CustomOptions[optionSplit[0]] = optionSplit[1];
+                    }
+                }
+            }
+        }
+    };
+
 
     cwFilterByExternalAssociation.prototype.createObjectNodes = function(nodeType,customOptions) {
         var nodes = customOptions.split(";");
