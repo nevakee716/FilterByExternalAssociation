@@ -12,7 +12,6 @@
 
             this.replaceLayout = options.CustomOptions['replace-layout'];
             cwApi.extend(this, cwApi.cwLayouts[this.replaceLayout], options, viewSchema);
-
             this.NodesID = {};
             this.createObjectNodes(true,this.options.CustomOptions['filter-in']);
             this.createObjectNodes(false,this.options.CustomOptions['filter-out']);           
@@ -75,16 +74,17 @@
     // obligatoire appeler par le system
     cwFilterByExternalAssociation.prototype.drawAssociations = function (output, associationTitleText, object) {
         this.findFilterFields(object);
-        output.push('<div id="cwLayoutFilterByExternalAssociationWrapper"><div id="cwLayoutFilterByExternalAssociation"></div></div>');
+        this.removeFilterFromSearchEngine(cwAPI.cwConfigs.SearchEngineRequirements[this.viewSchema.ViewName]);
         this.noneFilterObject = object;
-        this.maxDepth = this.calculateDepth(this.noneFilterObject);
+        output.push('<div id="cwLayoutFilterByExternalAssociationWrapper"><div id="cwLayoutFilterByExternalAssociation"></div></div><div id="cwLayoutContainerWrapper">');
+        this.maxDepth = this.analyzeStructureJson(this.noneFilterObject,0).depth;
         this.associationTitleText = associationTitleText;
         if(cwApi.cwLayouts[this.replaceLayout].prototype.drawAssociations) {
             cwApi.cwLayouts[this.replaceLayout].prototype.drawAssociations.call(this,output, associationTitleText, object);
         } else {
             cwApi.cwLayouts.CwLayout.prototype.drawAssociations.call(this,output, associationTitleText, object);
         }
-
+        output.push('</div>');
     };
 
     cwFilterByExternalAssociation.prototype.findFilterFields = function(child) {
@@ -104,26 +104,52 @@
         }
     };
 
-    cwFilterByExternalAssociation.prototype.calculateDepth = function (child,options) {
+    cwFilterByExternalAssociation.prototype.removeFilterFromSearchEngine = function(child) {
+        var nodeToDelete = [];
+        for (var i = 0; i < child.length; i += 1) {
+            if(this.NodesID.hasOwnProperty(child[i].id)) {
+                nodeToDelete.push(i);
+            } 
+            if(child[i].children) {
+                this.removeFilterFromSearchEngine(child[i].children);
+            }
+        }
+        for (var i = nodeToDelete.length-1; i >= 0; i -= 1) {
+            delete child.splice(nodeToDelete[i], 1);
+
+        }
+    };
+
+    cwFilterByExternalAssociation.prototype.analyzeStructureJson = function (child,level,options) {
         var nextChild = null;
-        var tempDepth = 0;       
-        var nextDepth = 0;
+        var tempInfo = {};   
+        var info = {};
+        info.noNodeFiler = true;
+        info.depth = 0;
 
         for (var associationNode in child.associations) {
             if (child.associations.hasOwnProperty(associationNode)) {
                 for (var i = 0; i < child.associations[associationNode].length; i += 1) {
                     nextChild = child.associations[associationNode][i];
-                    tempDepth = this.calculateDepth(nextChild) + 1;
-                    if(tempDepth > nextDepth) {
-                        nextDepth = tempDepth;
+                    tempInfo = this.analyzeStructureJson(nextChild,level + 1,options);
+                    tempInfo.depth += 1; 
+                    if(tempInfo.depth > info.depth) {
+                        info.depth = tempInfo.depth;
                     }
+                    if(!tempInfo.noNodeFiler) {
+                        info.noNodeFiler = tempInfo.noNodeFiler;
+                    }
+                }
+                if (this.NodesID.hasOwnProperty(associationNode)) {
+                    info.noNodeFiler = false;
                 }
             }
         }
         if(options !== false) {
-            child.depth = nextDepth;
+            child.depth = info.depth;
+            child.level = level;
         }
-        return nextDepth;
+        return info;
     };
 
     cwFilterByExternalAssociation.prototype.applyJavaScript = function () {
@@ -156,12 +182,11 @@
             if(container.firstChild && container.firstChild.firstChild){
                 for (node in this.NodesID) {
                     if (this.NodesID.hasOwnProperty(node)) {
-                        container.firstChild.firstChild.append(this.NodesID[node].getFilterObject());
+                        container.firstChild.firstChild.appendChild(this.NodesID[node].getFilterObject());
                     }
                 }
             }
 
-            //$(".page-top-li.top-actions").append(container.firstChild);
 
             var nodeID;
             var that = this;
@@ -192,7 +217,10 @@
 
         //on duplique le l objet json afin de toujours avoir une copie de l'original
         var filterObject = $.extend(true, {}, this.noneFilterObject);
-        this.FilterObject(filterObject);
+        if(!this.areAllFiltersUnselected()) {
+            this.FilterObject(filterObject);
+        }
+
         var output = [];
         var associationTitleText = this.associationTitleText;
         var i,j;
@@ -279,12 +307,26 @@
                 for (var i = nodeToDelete.length-1; i >= 0; i -= 1) {
                     delete child.associations[associationNode].splice(nodeToDelete[i], 1);
                 }
-                if(this.calculateDepth(child,false) !== child.depth) {
+                
+                var info = this.analyzeStructureJson(child,0,false); 
+                if(info.depth !== child.depth || (child.depth === 0 && info.noNodeFiler)) {
                     return false;
                 }
             }
         }
         return true;
+    };
+
+   cwFilterByExternalAssociation.prototype.areAllFiltersUnselected = function() {
+        var id;
+        for (id in this.NodesID) {
+            if (this.NodesID.hasOwnProperty(id)) {
+                if(this.NodesID[id].areAllUnselected() === false) {
+                    return false;
+                }
+            }
+        }
+        return true;   
     };
 
     cwApi.cwLayouts.cwFilterByExternalAssociation = cwFilterByExternalAssociation;

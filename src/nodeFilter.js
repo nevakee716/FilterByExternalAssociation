@@ -36,6 +36,19 @@
         }
     };
 
+    nodeFilter.prototype.areAllUnselected = function () {
+        var id;
+        for (id in this.filterField) {
+            if (this.filterField.hasOwnProperty(id)) {
+                if(this.filterField[id].state === true) {
+                    return false;
+                }
+            }
+        }
+        return true;   
+    };
+
+
     nodeFilter.prototype.getFields = function (state) {
         var result = [];
         var id;
@@ -104,6 +117,8 @@
         filterObject.setAttribute('data-actions-box','true');
         filterObject.setAttribute('data-container','body');
         filterObject.setAttribute('data-size','10');
+       // filterObject.setAttribute('data-width','fit');
+        
         filterObject.className = 'selectcwLayoutPickerFilterByExternalAssociation';
         filterObject.setAttribute('id',this.node);
 
