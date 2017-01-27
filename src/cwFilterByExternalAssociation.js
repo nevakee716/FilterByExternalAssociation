@@ -76,7 +76,6 @@
         this.findFilterFields(object);
         this.removeFilterFromSearchEngine(cwAPI.cwConfigs.SearchEngineRequirements[this.viewSchema.ViewName]);
         this.noneFilterObject = object;
-        output.push('<div id="cwLayoutFilterByExternalAssociationWrapper" class="bootstrap-iso"><div id="cwLayoutFilterByExternalAssociation"></div></div><div id="cwLayoutContainerWrapper">');
         this.maxDepth = this.analyzeStructureJson(this.noneFilterObject,0).depth;
         this.associationTitleText = associationTitleText;
         if(cwApi.cwLayouts[this.replaceLayout].prototype.drawAssociations) {
@@ -176,22 +175,27 @@
       
 
     cwFilterByExternalAssociation.prototype.createFilter = function () {
-            $('.selectcwLayoutPickerFilterByExternalAssociation').remove();
+            var classname = 'customLayoutFilter';
+            
+
+            $('.' + classname).remove();
             var container = document.getElementById("zone_" + this.viewSchema.ViewName);
             var node;
-            if(container.firstChild && container.firstChild.firstChild){
+            if(container && container.firstChild){
                 for (node in this.NodesID) {
                     if (this.NodesID.hasOwnProperty(node)) {
-                        container.firstChild.firstChild.appendChild(this.NodesID[node].getFilterObject());
+                        container.firstChild.appendChild(this.NodesID[node].getFilterObject(classname));
                     }
                 }
             }
 
+            //var canvaHeight = window.innerHeight - networkContainer.getBoundingClientRect().top;
+            container.setAttribute('style','height:' + window.innerHeight + 'px');
 
             var nodeID;
             var that = this;
-            $('.selectcwLayoutPickerFilterByExternalAssociation').selectpicker();
-            $('select.selectcwLayoutPickerFilterByExternalAssociation').on('changed.bs.select', function (e, clickedIndex, newValue, oldValue) {
+            $('.' + classname).selectpicker();
+            $('select.' + classname).on('changed.bs.select', function (e, clickedIndex, newValue, oldValue) {
                 nodeID = $(this).context['id'];
                 if(clickedIndex !== undefined) {
                     var id = $(this).context[clickedIndex]['id'];

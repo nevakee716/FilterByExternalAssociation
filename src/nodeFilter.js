@@ -104,7 +104,7 @@
     };
 
 
-    nodeFilter.prototype.getFilterObject = function () {
+    nodeFilter.prototype.getFilterObject = function (classname) {
         var filterObject;
         var object;
         var id;
@@ -115,11 +115,10 @@
         filterObject.setAttribute('data-live-search','true');
         filterObject.setAttribute('data-selected-text-format','count > 2');
         filterObject.setAttribute('data-actions-box','true');
-        filterObject.setAttribute('data-container','body');
         filterObject.setAttribute('data-size','10');
        // filterObject.setAttribute('data-width','fit');
         
-        filterObject.className = 'selectcwLayoutPickerFilterByExternalAssociation';
+        filterObject.className = classname;
         filterObject.setAttribute('id',this.node);
 
         for (id in this.filterField) {
