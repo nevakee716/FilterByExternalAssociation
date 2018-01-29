@@ -76,7 +76,7 @@
         this.findFilterFields(object);
         this.removeFilterFromSearchEngine(cwAPI.cwConfigs.SearchEngineRequirements[this.viewSchema.ViewName]);
         this.noneFilterObject = object;
-        output.push('<div id="cwLayoutFilterByExternalAssociation" class="bootstrap-iso"></div></div><div id="cwLayoutContainerWrapper">');
+        output.push('<div id="cwLayoutFilterByExternalAssociation" class="bootstrap-iso cw-visible"></div></div><div id="cwLayoutContainerWrapper">');
         this.maxDepth = this.analyzeStructureJson(this.noneFilterObject,0).depth;
         this.associationTitleText = associationTitleText;
         if(cwApi.cwLayouts[this.replaceLayout].prototype.drawAssociations) {
