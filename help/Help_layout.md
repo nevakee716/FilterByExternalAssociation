@@ -1,8 +1,10 @@
 | **Name** | **Filter By External Association** | **Version** |
 | --- | --- | --- |
-| **Updated by** | Mathias PFAUWADEL |  1.9x |
+| **Updated by** | Mathias PFAUWADEL |  1.11x |
 
 ## Patch Notes
+
+1.11 : works on tabs
 
 1.9 : Can use other custom layout
 
@@ -10,6 +12,9 @@
 
 ## Description 
 Allow you to filter items on a node depending on an association
+
+Important : this filter need to have the search in page activated
+and it only work on indexPage
 
 ## Installation
 https://github.com/casewise/cpm/wiki
