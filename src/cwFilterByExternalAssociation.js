@@ -17,9 +17,10 @@
             this.createObjectNodes(false,this.options.CustomOptions['filter-out']);           
             this.betweenAssociationTypePolicy = this.options.CustomOptions['multiple-association-type-policy'];
             this.betweenAssociationPolicy = this.options.CustomOptions['multiple-association-policy'];
-
+            this.duplicateViewSchema  = $.extend(true,{}, viewSchema);
             cwApi.registerLayoutForJSActions(this);
             this.viewSchema = viewSchema; 
+            this.nodeIDS = [];
 
             this.CreateOtherOptions(this.options.CustomOptions['other-options']);
         } else {
@@ -76,14 +77,15 @@
         this.findFilterFields(object);
         this.removeFilterFromSearchEngine(cwAPI.cwConfigs.SearchEngineRequirements[this.viewSchema.ViewName]);
         this.noneFilterObject = object;
-        output.push('<div id="cwLayoutFilterByExternalAssociation" class="bootstrap-iso cw-visible"></div></div><div id="cwLayoutContainerWrapper">');
-        this.maxDepth = this.analyzeStructureJson(this.noneFilterObject,0).depth;
+        output.push('<div id="cwLayoutFilterByExternalAssociation' + this.nodeID + '" class="bootstrap-iso cw-visible"></div></div><div id="cwLayoutContainerWrapper' + this.nodeID + '">');
+        this.maxDepth = this.analyzeStructureJson(true,this.noneFilterObject,0).depth;
         this.associationTitleText = associationTitleText;
         if(cwApi.cwLayouts[this.replaceLayout].prototype.drawAssociations) {
             cwApi.cwLayouts[this.replaceLayout].prototype.drawAssociations.call(this,output, associationTitleText, object);
         } else {
             cwApi.cwLayouts.CwLayout.prototype.drawAssociations.call(this,output, associationTitleText, object);
         }
+        this.clearOutsideBehaviours();
         output.push('</div>');
     };
 
@@ -120,7 +122,7 @@
         }
     };
 
-    cwFilterByExternalAssociation.prototype.analyzeStructureJson = function (child,level,options) {
+    cwFilterByExternalAssociation.prototype.analyzeStructureJson = function (first,child,level,options) {
         var nextChild = null;
         var tempInfo = {};   
         var info = {};
@@ -128,10 +130,11 @@
         info.depth = 0;
 
         for (var associationNode in child.associations) {
-            if (child.associations.hasOwnProperty(associationNode)) {
+            if ((first === false || associationNode === this.nodeID)  && child.associations.hasOwnProperty(associationNode)) {
+                this.nodeIDS.push(associationNode);
                 for (var i = 0; i < child.associations[associationNode].length; i += 1) {
                     nextChild = child.associations[associationNode][i];
-                    tempInfo = this.analyzeStructureJson(nextChild,level + 1,options);
+                    tempInfo = this.analyzeStructureJson(false,nextChild,level + 1,options);
                     tempInfo.depth += 1; 
                     if(tempInfo.depth > info.depth) {
                         info.depth = tempInfo.depth;
@@ -174,21 +177,38 @@
 
     };
       
+    cwFilterByExternalAssociation.prototype.clearOutsideBehaviours = function () {
+        var childrenToRemove = [];
+        var self = this;
+
+        this.duplicateViewSchema.Behaviours.forEach(function(b,i) {
+            if(b && b.Properties && b.Properties.NodeID && self.nodeIDS.indexOf(b.Properties.NodeID) === -1) {
+                childrenToRemove.push(i);
+            }
+        });
+
+
+        for (let i = childrenToRemove.length-1; i >= 0; i -= 1) {
+            delete this.duplicateViewSchema.Behaviours.splice(childrenToRemove[i], 1);
+        }
+    };
 
     cwFilterByExternalAssociation.prototype.createFilter = function () {
             var classname = 'customLayoutFilter';
             
 
             $('.' + classname).remove();
-            var container = document.getElementById("zone_" + this.viewSchema.ViewName);
+            var container = document.getElementById("cwLayoutContainerWrapper" + this.nodeID);
+            var filterContainer = document.getElementById('cwLayoutFilterByExternalAssociation' + this.nodeID );
+            
             var node;
-            if(container && container.firstChild){
+
                 for (node in this.NodesID) {
                     if (this.NodesID.hasOwnProperty(node)) {
-                        container.firstChild.appendChild(this.NodesID[node].getFilterObject(classname));
+                        filterContainer.appendChild(this.NodesID[node].getFilterObject(classname));
                     }
                 }
-            }
+            
 
             //var canvaHeight = window.innerHeight - networkContainer.getBoundingClientRect().top;
             container.setAttribute('style','height:' + window.innerHeight + 'px');
@@ -223,7 +243,7 @@
         //on duplique le l objet json afin de toujours avoir une copie de l'original
         var filterObject = $.extend(true, {}, this.noneFilterObject);
         if(!this.areAllFiltersUnselected()) {
-            this.FilterObject(filterObject);
+            this.FilterObject(filterObject,true);
         }
 
         var output = [];
@@ -248,10 +268,10 @@
         } else {
             cwApi.cwLayouts.CwLayout.prototype.drawAssociations.call(this,output, associationTitleText, filterObject);
         }
-        container.lastChild.innerHTML = output.join('');
+        container.innerHTML = output.join('');
 
         //enable behaviours
-        cwAPI.cwDisplayManager.enableBehaviours(this.viewSchema,filterObject,false);
+        cwAPI.cwDisplayManager.enableBehaviours(this.duplicateViewSchema,filterObject,false);
 
 
         //deploy stored accordeon (match are made on the href)
@@ -274,7 +294,7 @@
         }*/
 
 
-    cwFilterByExternalAssociation.prototype.FilterObject = function(child) {
+    cwFilterByExternalAssociation.prototype.FilterObject = function(child,first) {
         var nextChild = null;
         var nodeToDelete;
         var i;
@@ -283,7 +303,7 @@
 
         // check if there is one or several association to be filter
         for (var associationNode in child.associations) {
-            if (child.associations.hasOwnProperty(associationNode) && this.NodesID.hasOwnProperty(associationNode)) {
+            if ((first === undefined || associationNode === this.nodeID) && child.associations.hasOwnProperty(associationNode) && this.NodesID.hasOwnProperty(associationNode)) {
                 // init the node if it should be filtered
                 if(state === undefined) {
                     state = policyBetweenAT; 
@@ -300,7 +320,7 @@
 
         // otherway continue parsing of the json object
         for (var associationNode in child.associations) {
-            if (child.associations.hasOwnProperty(associationNode)) {
+            if ((first === undefined || associationNode === this.nodeID) && child.associations.hasOwnProperty(associationNode)) {
                 nodeToDelete = [];
                 for (i = 0; i < child.associations[associationNode].length; i += 1) {
                     nextChild = child.associations[associationNode][i];
@@ -313,7 +333,7 @@
                     delete child.associations[associationNode].splice(nodeToDelete[i], 1);
                 }
                 
-                var info = this.analyzeStructureJson(child,0,false); 
+                var info = this.analyzeStructureJson(false,child,0,false); 
                 if(info.depth !== child.depth || (child.depth === 0 && info.noNodeFiler)) {
                     return false;
                 }

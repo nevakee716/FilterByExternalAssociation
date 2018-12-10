@@ -65,6 +65,7 @@
         var state = undefined; // if there are no filter check state stay undefined and return false
         var id;
         var isFieldInObject;
+        if(this.areAllUnselected()) return this.policy;
        
         // go throught all filter fields that are true
         for (id in this.filterField) {
