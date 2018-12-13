@@ -122,14 +122,33 @@
         filterObject.className = classname;
         filterObject.setAttribute('id',this.node);
 
+        var array = [];
         for (id in this.filterField) {
-            if (this.filterField.hasOwnProperty(id)) {
-                object = document.createElement("option");
-                object.setAttribute('id',id);
-                object.textContent = this.filterField[id].name;
-                filterObject.appendChild(object);
+             if (this.filterField.hasOwnProperty(id)) {
+                var element = {};
+                element.id = id;
+                element.label = this.filterField[id].name;
+                array.push(element);
             }                                                                                                                                                                                                                                                                                                                                                                                                            
         }
+
+        array.sort(function (a, b) {
+            var nameA=a.label.toLowerCase(), nameB=b.label.toLowerCase();
+            if (nameA < nameB) //sort string ascending
+                return -1;
+            if (nameA > nameB)
+                return 1;
+            return 0; //default return value (no sorting)
+        });
+
+        array.forEach(function(element) {
+            object = document.createElement("option");
+            object.setAttribute('id',element.id);
+            object.textContent = element.label; 
+            filterObject.appendChild(object);
+        });
+
+
         return filterObject;
     };
 
